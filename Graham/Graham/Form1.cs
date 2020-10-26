@@ -26,24 +26,22 @@ namespace Graham
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Point s0 = dots[0];
-            int s0_index = 0;
             for (int i = 1; i < dots.Count; i++)
             {
-                if (dots[i].Y < s0.Y)
+                if (dots[i].X < dots[0].X)
                 {
-                    s0 = dots[i];
-                    s0_index = i;
+                    Point temp = dots[0];
+                    dots[0] = dots[i];
+                    dots[i] = temp;
                 }
             }
-            // обозначим экстремальную точку S0 и удаляем её из набора остальных точек
-            set_pixel(s0.X, s0.Y, Color.Red);
-            dots.RemoveAt(s0_index);
+            // обозначим экстремальную точку S0
+            set_pixel(dots[0].X, dots[0].Y, Color.Black);
 
-            for (int i = 0; i < dots.Count; i++)
+            for (int i = 2; i < dots.Count; i++)
             {
                 int j = i;
-                while (j > 1 && CrossP(s0, dots[j - 1], dots[j]) < 0)
+                while (j > 1 && CrossP(dots[0], dots[j - 1], dots[j]) < 0)
                 {
                     Point temp = dots[j];
                     dots[j] = dots[j - 1];
@@ -55,25 +53,17 @@ namespace Graham
             // сортируем точки
             // Остальные точки сортируются в порядке увеличения полярного угла относительно точки S0.
             // Если полярные углы точек равны, то точка меньше, если ее радиус(расстояние до точки S0) меньше.
-            //for (int i = 0; i < dots.Count; i++)
+            //for (int i = 1; i < dots.Count; i++)
             //{
-            //    for (int j = i + 1; j < dots.Count - 1; j++)
+            //    for (int j = i + 1; j < dots.Count; j++)
             //    {
-            //        double r_i = Math.Sqrt(Math.Pow(s0.X - dots[i].X, 2) + Math.Pow(s0.Y - dots[i].Y, 2));
-            //        double phi_i = Math.Abs(dots[i].X - s0.X) / r_i;
+            //        double r_i = Math.Sqrt(Math.Pow(dots[0].X - dots[i].X, 2) + Math.Pow(dots[0].Y - dots[i].Y, 2));
+            //        double phi_i = Math.Abs(dots[i].X - dots[0].X) / r_i;
 
-            //        double r_j = Math.Sqrt(Math.Pow(s0.X - dots[j].X, 2) + Math.Pow(s0.Y - dots[j].Y, 2));
-            //        double phi_j = Math.Abs(dots[j].X - s0.X) / r_j;
+            //        double r_j = Math.Sqrt(Math.Pow(dots[0].X - dots[j].X, 2) + Math.Pow(dots[0].Y - dots[j].Y, 2));
+            //        double phi_j = Math.Abs(dots[j].X - dots[0].X) / r_j;
 
-            //        //if (phi_i > phi_j || r_i > r_j)
-            //        //{
-            //        //    Point temp = dots[i];
-            //        //    dots[i] = dots[j];
-            //        //    dots[j] = temp;
-            //        //}
-
-
-            //        if (dots[i].X > dots[j].X)
+            //        if (phi_i > phi_j || r_i > r_j)
             //        {
             //            Point temp = dots[i];
             //            dots[i] = dots[j];
@@ -84,8 +74,12 @@ namespace Graham
 
             // Алгоритм Грехема
             List<Point> current = new List<Point>();
-            current.Add(s0);
             current.Add(dots[0]);
+            if (dots.Count == 1)
+            {
+                return;
+            }
+            current.Add(dots[1]);
 
             for (int i = 1; i < dots.Count; i++)
             {
@@ -96,6 +90,15 @@ namespace Graham
                 current.Add(dots[i]);
             }
 
+            int wdth = pictureBox1.Width;
+            int hght = pictureBox1.Height;
+            bmp = new Bitmap(wdth, hght);
+            pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+
+            for (int i = 0; i < dots.Count; i++)
+            {
+                set_pixel(dots[i].X, dots[i].Y, Color.Black);
+            }
 
             for (int i = 0; i < current.Count - 1; i++)
             {
