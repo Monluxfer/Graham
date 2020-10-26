@@ -24,11 +24,21 @@ namespace Graham
             bmp = new Bitmap(wdth, hght);
         }
 
+        public double PolarAngle(double y, double x)
+        {
+            double res = Math.Atan2(y, x);
+            if (res < 0)
+            {
+                res += 2 * Math.PI;
+            }
+            return res;
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             for (int i = 1; i < dots.Count; i++)
             {
-                if (dots[i].X < dots[0].X)
+                if (dots[i].Y < dots[0].Y)
                 {
                     Point temp = dots[0];
                     dots[0] = dots[i];
@@ -38,17 +48,17 @@ namespace Graham
             // обозначим экстремальную точку S0
             set_pixel(dots[0].X, dots[0].Y, Color.Black);
 
-            for (int i = 2; i < dots.Count; i++)
-            {
-                int j = i;
-                while (j > 1 && CrossP(dots[0], dots[j - 1], dots[j]) < 0)
-                {
-                    Point temp = dots[j];
-                    dots[j] = dots[j - 1];
-                    dots[j - 1] = temp;
-                    j -= 1;
-                }
-            }
+            //for (int i = 2; i < dots.Count; i++)
+            //{
+            //    int j = i;
+            //    while (j > 1 && CrossP(dots[0], dots[j - 1], dots[j]) < 0)
+            //    {
+            //        Point temp = dots[j];
+            //        dots[j] = dots[j - 1];
+            //        dots[j - 1] = temp;
+            //        j -= 1;
+            //    }
+            //}
 
             // сортируем точки
             // Остальные точки сортируются в порядке увеличения полярного угла относительно точки S0.
@@ -59,11 +69,17 @@ namespace Graham
             //    {
             //        double r_i = Math.Sqrt(Math.Pow(dots[0].X - dots[i].X, 2) + Math.Pow(dots[0].Y - dots[i].Y, 2));
             //        double phi_i = Math.Abs(dots[i].X - dots[0].X) / r_i;
+            //        double xDiff = dots[i].X - dots[0].X;
+            //        double yDiff = dots[i].Y - dots[0].Y;
+            //        phi_i = Math.Atan2(xDiff, yDiff) * 180.0 / Math.PI;
 
             //        double r_j = Math.Sqrt(Math.Pow(dots[0].X - dots[j].X, 2) + Math.Pow(dots[0].Y - dots[j].Y, 2));
             //        double phi_j = Math.Abs(dots[j].X - dots[0].X) / r_j;
+            //        xDiff = dots[i].X - dots[0].X;
+            //        yDiff = dots[i].Y - dots[0].Y;
+            //        phi_j = Math.Atan2(xDiff, yDiff) * 180.0 / Math.PI;
 
-            //        if (phi_i > phi_j || r_i > r_j)
+            //        if (phi_i > phi_j)
             //        {
             //            Point temp = dots[i];
             //            dots[i] = dots[j];
@@ -72,18 +88,26 @@ namespace Graham
             //    }
             //}
 
+            dots = dots.OrderBy(p => PolarAngle(p.Y - dots[0].Y, p.X - dots[0].X)).ToList();
+
             // Алгоритм Грехема
             List<Point> current = new List<Point>();
+
+            // Добавим правильные точки
             current.Add(dots[0]);
             if (dots.Count == 1)
             {
                 return;
             }
             current.Add(dots[1]);
-
-            for (int i = 1; i < dots.Count; i++)
+            if (dots.Count > 2)
             {
-                while (current.Count > 2 && CrossP(current.ElementAt(current.Count - 2), current.ElementAt(current.Count - 1), dots[i]) < 0)
+                current.Add(dots[2]);
+            }
+
+            for (int i = 3; i < dots.Count; i++)
+            {
+                while (CrossP(current.ElementAt(current.Count - 2), current.ElementAt(current.Count - 1), dots[i]) != -1)
                 {
                     current.RemoveAt(current.Count - 1);
                 }
